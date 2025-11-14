@@ -1,50 +1,207 @@
-# Welcome to your Expo app 👋
+# UrbanTracker - Google Maps-Style Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Una aplicación móvil moderna estilo Google Maps para seguimiento urbano, construida con React Native, Expo y Mapbox.
 
-## Get started
+## 🚀 Características
 
-1. Install dependencies
+- **Interfaz Estilo Google Maps**: UI familiar con tema oscuro y negro como color predominante
+- **Integración Mapbox**: Mapeo interactivo de alta calidad
+- **Ubicación en Tiempo Real**: GPS y servicios de ubicación
+- **Controles Interactivos**: Zoom, cambio de capas, ubicación actual y navegación
+- **Marcadores Urbanos**: Características urbanas, transporte público y puntos de interés
+- **Tema Oscuro**: Optimizado para visualización nocturna
 
-   ```bash
-   npm install
-   ```
+## 🛠 Instalación y Configuración
 
-2. Start the app
+### Prerrequisitos
+- Node.js (16 o superior)
+- npm o yarn
+- Expo CLI (`npm install -g @expo/cli`)
+- Cuenta de Mapbox (para token de API)
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+### 1. Instalar Dependencias
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Configurar Token de Mapbox
 
-## Learn more
+**Opción A: Archivo .env (Recomendado)**
+1. Ve a [mapbox.com](https://www.mapbox.com/) y crea una cuenta
+2. Obtén tu token de acceso desde [account access tokens](https://www.mapbox.com/account/access-tokens/)
+3. Edita el archivo `.env` en la raíz del proyecto:
+```bash
+# UrbanTracker Environment Variables
+MAPBOX_ACCESS_TOKEN=pk.tu_token_real_aqui
+APP_NAME=UrbanTracker
+APP_VERSION=1.0.0
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+**Opción B: Configuración Directa**
+Si prefieres configurar directamente, edita `constants/config.ts`:
+```typescript
+export const ENV = {
+  MAPBOX_ACCESS_TOKEN: 'pk.tu_token_real_aqui',
+  APP_NAME: 'UrbanTracker',
+  APP_VERSION: '1.0.0',
+};
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### 3. Ejecutar la App
+```bash
+# Iniciar servidor de desarrollo
+npm start
 
-## Join the community
+# Ejecutar en plataformas específicas
+npm run ios     # Simulador iOS
+npm run android # Emulador Android
+npm run web     # Navegador Web
+```
 
-Join our community of developers creating universal apps.
+## 📁 Estructura del Proyecto
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+MovilApp/
+├── .env                    # Variables de entorno (tu token aquí)
+├── .env.example           # Plantilla de variables
+├── app/
+│   ├── (tabs)/
+│   │   ├── _layout.tsx    # Layout de navegación
+│   │   ├── index.tsx      # Pantalla de inicio
+│   │   ├── map.tsx        # Pantalla de mapa principal
+│   │   └── explore.tsx    # Pantalla de exploración
+│   ├── _layout.tsx        # Layout raíz
+│   └── modal.tsx          # Pantalla modal
+├── components/
+│   ├── MapControls.tsx    # Controles de mapa
+│   └── ui/                # Componentes UI
+├── constants/
+│   ├── config.ts         # Configuración de entorno
+│   └── theme.ts          # Tema oscuro y config Mapbox
+└── assets/
+    └── images/           # Logos UrbanTracker (SVG)
+```
+
+## 🗺️ Funcionalidades del Mapa
+
+### Controles Disponibles
+- **Zoom In/Out**: Botones +/- en la esquina superior derecha
+- **Ubicación Actual**: Botón GPS para centrar en tu ubicación
+- **Selector de Capas**: Cambia entre Dark, Streets, Outdoors, Satellite, Hybrid
+- **Búsqueda**: Barra de búsqueda con entrada de voz
+- **Navegación**: Función de direcciones (próximamente)
+
+### Tipos de Marcadores
+- **🔴 Urbano**: Características urbanas (edificios, parques)
+- **🔵 Transporte**: Rutas y paradas de transporte público
+- **🟢 POI**: Puntos de interés (monumentos, museos)
+- **🟡 Eventos**: Eventos y actividades urbanas
+
+### Temas de Mapa Disponibles
+- **Dark**: Tema oscuro para visualización nocturna
+- **Streets**: Mapa detallado de calles
+- **Outdoors**: Características al aire libre y senderos
+- **Satellite**: Imágenes satelitales
+- **Hybrid**: Satélite con etiquetas de calles
+
+## 🎨 Tema Oscuro
+
+La aplicación utiliza un tema oscuro completo con negro como color predominante:
+
+- **Fondo Principal**: `#000000` (negro puro)
+- **Superficies**: `#121212`, `#1e1e1e`
+- **Botones**: `#2d2d2d`
+- **Bordes**: `#333333`
+- **Acentos**: 
+  - Azul: `#1a73e8`
+  - Verde: `#34a853`
+  - Naranja: `#ff9800`
+
+## 🔧 Configuración de Desarrollo
+
+### Variables de Entorno
+El proyecto usa variables de entorno para configuraciones sensibles:
+
+```bash
+# Archivo .env (crear este archivo)
+MAPBOX_ACCESS_TOKEN=pk.tu_token_real_aqui
+APP_NAME=UrbanTracker
+APP_VERSION=1.0.0
+```
+
+### Detección Automática
+La aplicación detecta automáticamente:
+- ✅ Si Mapbox está configurado → Muestra mapa interactivo
+- ⚠️ Si no hay token → Muestra UI de respaldo elegante
+- 📱 Plataforma del dispositivo → Ajusta comportamiento
+
+## 🐛 Solución de Problemas
+
+### Mapbox no funciona
+1. Verifica que el token sea válido en [mapbox.com](https://www.mapbox.com/)
+2. Asegúrate de que el token tenga los permisos correctos
+3. Revisa la consola de desarrollo para mensajes de error
+
+### Problemas de Ubicación
+1. Verifica permisos de ubicación en configuración del dispositivo
+2. Asegúrate de que los servicios de ubicación estén habilitados
+3. Prueba con un dispositivo real (la ubicación puede no funcionar en simulador)
+
+### Errores de Compilación
+1. Limpia la caché: `npm start -- --clear`
+2. Reinicia Metro bundler
+3. Verifica que todas las dependencias estén instaladas
+
+## 📱 Uso de la App
+
+### Pantalla de Inicio
+- Logo de UrbanTracker con branding completo
+- Estadísticas de la aplicación (500+ características urbanas, 50+ rutas de transporte)
+- Descripción de características clave
+- Botón para navegar al mapa
+
+### Pantalla de Mapa
+- **Header**: Logo + botón de búsqueda
+- **Mapa**: Interfaz estilo Google Maps con todos los controles
+- **Controles**: Zoom, ubicación, capas, navegación
+- **Marcadores**: Características urbanas interactivas
+- **Tarjetas**: Información detallada de ubicaciones
+
+## 🚀 Despliegue
+
+### Para Desarrollo
+```bash
+npm start
+```
+
+### Para Producción
+```bash
+# Build para iOS
+eas build --platform ios
+
+# Build para Android
+eas build --platform android
+
+# Build para Web
+eas build --platform web
+```
+
+## 🤝 Contribución
+
+1. Sigue la estructura de código existente
+2. Mantén la consistencia del tema oscuro
+3. Prueba en iOS y Android
+4. Actualiza documentación para nuevas características
+
+## 📄 Licencia
+
+Este proyecto utiliza Expo, React Native y Mapbox. Asegúrate de cumplir con sus términos de licencia respectivos.
+
+---
+
+**Construido con ❤️ para Exploración Urbana**
+
+### 🔗 Enlaces Útiles
+- [Documentación de Mapbox](https://docs.mapbox.com/)
+- [Documentación de Expo](https://docs.expo.dev/)
+- [Tokens de Mapbox](https://www.mapbox.com/account/access-tokens/)
