@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 
 export const API_CONFIG = {
-  BASE_URL: (Constants.expoConfig?.extra?.apiUrl as string) || 'http://10.3.234.142:8080/api/v1',
+  BASE_URL: (Constants.expoConfig?.extra?.apiUrl as string) || 'http://192.168.1.3:8080/api/v1',
   TIMEOUT: 10000,
   RETRY_ATTEMPTS: 3,
 } as const;

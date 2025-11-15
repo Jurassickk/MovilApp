@@ -50,7 +50,7 @@ export interface WebSocketStatus {
 }
 
 export class WebSocketService {
-  private ws: WebSocket | null = null;
+  private ws: NativeWebSocket | null = null;
   private config: WebSocketConfig;
   private reconnectTimer: number | null = null;
   private heartbeatTimer: number | null = null;
@@ -74,7 +74,7 @@ export class WebSocketService {
   async connect(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       try {
-        if (this.ws?.readyState === WebSocket.OPEN) {
+        if (this.ws?.readyState === 1) { // WebSocket.OPEN = 1
           resolve(true);
           return;
         }
@@ -83,15 +83,19 @@ export class WebSocketService {
 
         console.log('🔌 Conectando al servidor WebSocket...');
 
-        // En React Native, usar la implementación nativa
+        // Usar la implementación nativa de WebSocket para React Native
         if (Platform.OS === 'web') {
-          this.ws = new WebSocket(this.config.url);
+          this.ws = new WebSocket(this.config.url) as NativeWebSocket;
         } else {
-          // Para React Native, usar polyfill o implementación específica
-          this.ws = new (require('ws').WebSocket)(this.config.url);
+          // Para React Native, usar la implementación nativa
+          this.ws = new (require('react-native').WebSocket)(this.config.url) as NativeWebSocket;
         }
 
-        this.ws!.onopen = () => {
+        if (!this.ws) {
+          throw new Error('No se pudo crear la instancia WebSocket');
+        }
+
+        this.ws.onopen = () => {
           console.log('✅ WebSocket conectado exitosamente');
           this.updateStatus({
             connected: true,
@@ -106,18 +110,19 @@ export class WebSocketService {
           resolve(true);
         };
 
-        this.ws!.onmessage = (event: any) => {
+        this.ws.onmessage = (event: any) => {
           this.handleMessage(event);
         };
 
-        this.ws!.onerror = (error: any) => {
+        this.ws.onerror = (error: any) => {
           console.error('❌ Error en WebSocket:', error);
           this.updateStatus({
             lastError: error.message || 'Error de conexión WebSocket'
           });
+          reject(error);
         };
 
-        this.ws!.onclose = (event: any) => {
+        this.ws.onclose = (event: any) => {
           console.log('🔌 WebSocket desconectado:', event.code, event.reason);
           this.updateStatus({
             connected: false,
@@ -133,7 +138,9 @@ export class WebSocketService {
             this.scheduleReconnect();
           }
           
-          reject(new Error(`WebSocket cerrado: ${event.code} - ${event.reason}`));
+          if (event.code !== 1000) {
+            reject(new Error(`WebSocket cerrado: ${event.code} - ${event.reason}`));
+          }
         };
 
         // Timeout de conexión
@@ -185,7 +192,7 @@ export class WebSocketService {
     hasAssignedRoute?: boolean;
     trackingType?: 'assigned_route' | 'free_tracking';
   } = {}): boolean {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+    if (!this.ws || this.ws.readyState !== 1) { // WebSocket.OPEN = 1
       console.warn('⚠️ WebSocket no está conectado');
       return false;
     }
@@ -331,7 +338,7 @@ export class WebSocketService {
     this.stopHeartbeat();
     
     this.heartbeatTimer = setInterval(() => {
-      if (this.ws?.readyState === WebSocket.OPEN) {
+      if (this.ws?.readyState === 1) { // WebSocket.OPEN = 1
         this.ws.send(JSON.stringify({ type: 'ping', timestamp: Date.now() }));
       }
     }, this.config.heartbeatInterval);
@@ -361,7 +368,7 @@ export class WebSocketService {
    * Envía pong en respuesta a ping
    */
   private sendPong(): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
+    if (this.ws?.readyState === 1) { // WebSocket.OPEN = 1
       this.ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
     }
   }
