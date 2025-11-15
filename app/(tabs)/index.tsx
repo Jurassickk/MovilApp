@@ -1,177 +1,276 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import useAuth from '@/hooks/useAuth';
 
 export default function HomeScreen() {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? 'dark'];
+  const { user, logout, isLoading } = useAuth();
+  const [trackingStatus, setTrackingStatus] = useState<'INACTIVE' | 'ACTIVE' | 'PAUSED'>('INACTIVE');
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Cerrar Sesión',
+      '¿Estás seguro que quieres cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Cerrar Sesión',
+          style: 'destructive',
+          onPress: logout,
+        },
+      ]
+    );
+  };
+
+  const handleToggleTracking = () => {
+    if (trackingStatus === 'INACTIVE') {
+      setTrackingStatus('ACTIVE');
+      setIsConnecting(true);
+      
+      setTimeout(() => {
+        setIsConnecting(false);
+        Alert.alert(
+          'Seguimiento Iniciado',
+          'El seguimiento de ubicación se ha iniciado correctamente.',
+          [{ text: 'Entendido' }]
+        );
+      }, 2000);
+    } else if (trackingStatus === 'ACTIVE') {
+      setTrackingStatus('PAUSED');
+      Alert.alert(
+        'Seguimiento Pausado',
+        'El seguimiento de ubicación se ha pausado.',
+        [{ text: 'Entendido' }]
+      );
+    } else {
+      setTrackingStatus('ACTIVE');
+      Alert.alert(
+        'Seguimiento Reanudado',
+        'El seguimiento de ubicación se ha reanudado.',
+        [{ text: 'Entendido' }]
+      );
+    }
+  };
+
+  const getTrackingButtonText = () => {
+    if (isConnecting) return 'Conectando...';
+    
+    switch (trackingStatus) {
+      case 'INACTIVE':
+        return 'Iniciar Seguimiento';
+      case 'ACTIVE':
+        return 'Pausar Seguimiento';
+      case 'PAUSED':
+        return 'Reanudar Seguimiento';
+      default:
+        return 'Iniciar Seguimiento';
+    }
+  };
+
+  const getTrackingButtonColor = () => {
+    if (isConnecting) return '#f59e0b';
+    
+    switch (trackingStatus) {
+      case 'INACTIVE':
+        return '#10b981';
+      case 'ACTIVE':
+        return '#f59e0b';
+      case 'PAUSED':
+        return '#3b82f6';
+      default:
+        return '#10b981';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#ffffff" />
+        <Text style={styles.loadingText}>Cargando...</Text>
+      </View>
+    );
+  }
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: theme.background }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/white-complete-logo.svg')}
-          style={styles.logoImage}
-          contentFit="contain"
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title" style={{ color: theme.text }}>
-          Welcome to UrbanTracker
-        </ThemedText>
-      </ThemedView>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>UrbanTracker Driver</Text>
+        <Text style={styles.subtitle}>Panel de Conductor</Text>
+      </View>
 
-      <ThemedView style={styles.featureContainer}>
-        <ThemedText type="subtitle" style={{ color: theme.text }}>
-          Urban Mapping & Tracking
-        </ThemedText>
-        <ThemedText style={{ color: theme.text }}>
-          Explore the city with our comprehensive mapping solution. Track urban features, public transport, and points of interest with real-time data.
-        </ThemedText>
-      </ThemedView>
-
-      <ThemedView style={styles.statsContainer}>
-        <View style={[styles.statCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Ionicons name="map" size={24} color={theme.primary} />
-          <ThemedText type="title" style={{ color: theme.text }}>500+</ThemedText>
-          <ThemedText style={{ color: theme.text }}>Urban Features</ThemedText>
+      <View style={styles.driverInfoCard}>
+        <Text style={styles.cardTitle}>Información del Conductor</Text>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Identificación:</Text>
+          <Text style={styles.value}>{user?.identificacion || 'N/A'}</Text>
         </View>
-
-        <View style={[styles.statCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Ionicons name="bus" size={24} color={theme.secondary} />
-          <ThemedText type="title" style={{ color: theme.text }}>50+</ThemedText>
-          <ThemedText style={{ color: theme.text }}>Transport Routes</ThemedText>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Nombre:</Text>
+          <Text style={styles.value}>{user?.nombre || 'No especificado'}</Text>
         </View>
-
-        <View style={[styles.statCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <Ionicons name="location" size={24} color={theme.accent} />
-          <ThemedText type="title" style={{ color: theme.text }}>1000+</ThemedText>
-          <ThemedText style={{ color: theme.text }}>Points of Interest</ThemedText>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Vehículo Asignado:</Text>
+          <Text style={styles.value}>{user?.vehicleId || 'No asignado'}</Text>
         </View>
-      </ThemedView>
-
-      <ThemedView style={styles.featuresContainer}>
-        <ThemedText type="subtitle" style={{ color: theme.text }}>
-          Key Features
-        </ThemedText>
-
-        <View style={[styles.featureCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <View style={styles.featureHeader}>
-            <Ionicons name="search" size={20} color={theme.primary} />
-            <ThemedText style={{ color: theme.text, fontWeight: '600' }}>Smart Search</ThemedText>
-          </View>
-          <ThemedText style={{ color: theme.text }}>
-            Find any location, business, or urban feature with our intelligent search system.
-          </ThemedText>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Ruta Asignada:</Text>
+          <Text style={styles.value}>{user?.routeId || 'No asignada'}</Text>
         </View>
+      </View>
 
-        <View style={[styles.featureCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <View style={styles.featureHeader}>
-            <Ionicons name="navigate" size={20} color={theme.secondary} />
-            <ThemedText style={{ color: theme.text, fontWeight: '600' }}>Real-time Directions</ThemedText>
-          </View>
-          <ThemedText style={{ color: theme.text }}>
-            Get turn-by-turn navigation with live traffic updates and alternative routes.
-          </ThemedText>
+      <View style={styles.trackingCard}>
+        <Text style={styles.cardTitle}>Estado de Seguimiento</Text>
+        <View style={styles.statusRow}>
+          <View style={[
+            styles.statusIndicator,
+            { backgroundColor: trackingStatus === 'ACTIVE' ? '#10b981' : 
+                             trackingStatus === 'PAUSED' ? '#f59e0b' : '#ef4444' }
+          ]} />
+          <Text style={styles.statusText}>
+            {trackingStatus === 'ACTIVE' ? 'Seguimiento Activo' :
+             trackingStatus === 'PAUSED' ? 'Seguimiento Pausado' : 'Seguimiento Inactivo'}
+          </Text>
         </View>
+        
+        <TouchableOpacity
+          style={[styles.trackingButton, { backgroundColor: getTrackingButtonColor() }]}
+          onPress={handleToggleTracking}
+          disabled={isConnecting}
+        >
+          {isConnecting ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Text style={styles.trackingButtonText}>{getTrackingButtonText()}</Text>
+          )}
+        </TouchableOpacity>
+      </View>
 
-        <View style={[styles.featureCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          <View style={styles.featureHeader}>
-            <Ionicons name="notifications" size={20} color={theme.accent} />
-            <ThemedText style={{ color: theme.text, fontWeight: '600' }}>Live Updates</ThemedText>
-          </View>
-          <ThemedText style={{ color: theme.text }}>
-            Stay informed with real-time updates on public transport, events, and urban changes.
-          </ThemedText>
+      <View style={styles.connectionCard}>
+        <Text style={styles.cardTitle}>Estado de Conexión</Text>
+        <View style={styles.statusRow}>
+          <View style={styles.statusIndicator} />
+          <Text style={styles.statusText}>Conectado</Text>
         </View>
-      </ThemedView>
+      </View>
 
-      <TouchableOpacity
-        style={[styles.getStartedButton, { backgroundColor: theme.primary }]}
-        onPress={() => {
-          // Navigation to map would be handled by router
-        }}
-      >
-        <ThemedText style={{ color: '#ffffff', fontWeight: '600', fontSize: 16 }}>
-          Explore the Map
-        </ThemedText>
-        <Ionicons name="arrow-forward" size={20} color="#ffffff" />
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Cerrar Sesión</Text>
       </TouchableOpacity>
-
-      <ThemedView style={styles.footerContainer}>
-        <ThemedText style={{ color: theme.icon, fontSize: 12 }}>
-          Powered by Mapbox • Built for Urban Exploration
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  logoImage: {
-    height: 100,
-    width: 300,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  featureContainer: {
-    gap: 8,
-    marginBottom: 24,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-  },
-  statCard: {
+  container: {
     flex: 1,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    gap: 8,
+    padding: 20,
+    backgroundColor: '#000000',
   },
-  featuresContainer: {
-    gap: 16,
-    marginBottom: 24,
-  },
-  featureCard: {
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 12,
-  },
-  featureHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  getStartedButton: {
-    flexDirection: 'row',
+  loadingContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 25,
-    gap: 8,
-    marginBottom: 24,
+    backgroundColor: '#000000',
   },
-  footerContainer: {
+  loadingText: {
+    color: '#ffffff',
+    marginTop: 10,
+    fontSize: 16,
+  },
+  header: {
     alignItems: 'center',
-    paddingVertical: 16,
+    marginBottom: 30,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#9ca3af',
+  },
+  driverInfoCard: {
+    backgroundColor: '#1f2937',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+  },
+  trackingCard: {
+    backgroundColor: '#1f2937',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+  },
+  connectionCard: {
+    backgroundColor: '#1f2937',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginBottom: 15,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  label: {
+    fontSize: 14,
+    color: '#9ca3af',
+    flex: 1,
+  },
+  value: {
+    fontSize: 14,
+    color: '#ffffff',
+    fontWeight: '500',
+    flex: 1,
+    textAlign: 'right',
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  statusIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#10b981',
+    marginRight: 10,
+  },
+  statusText: {
+    fontSize: 16,
+    color: '#ffffff',
+  },
+  trackingButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  trackingButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  logoutButton: {
+    backgroundColor: '#ef4444',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 'auto',
+  },
+  logoutButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
