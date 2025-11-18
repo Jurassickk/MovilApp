@@ -1,6 +1,20 @@
 import { Platform } from 'react-native';
 import type { Location } from '@/types/location';
 
+// Importar WebSocket dinámicamente para cada plataforma
+let RNWebSocket: any = null;
+
+if (Platform.OS === 'web') {
+  RNWebSocket = WebSocket;
+} else {
+  try {
+    RNWebSocket = require('react-native').WebSocket;
+  } catch {
+    console.warn('⚠️ WebSocket no disponible en esta plataforma');
+    RNWebSocket = null;
+  }
+}
+
 // WebSocket interface compatible con React Native
 interface NativeWebSocket {
   onopen: ((event: any) => void) | null;
@@ -10,10 +24,11 @@ interface NativeWebSocket {
   send(data: string): void;
   close(code?: number, reason?: string): void;
   readyState: number;
+  CONNECTING: number;
+  OPEN: number;
+  CLOSING: number;
+  CLOSED: number;
 }
-
-// Timer types for React Native
-type TimerId = ReturnType<typeof setTimeout> | ReturnType<typeof setInterval>;
 
 export interface WebSocketConfig {
   url: string;
@@ -83,13 +98,13 @@ export class WebSocketService {
 
         console.log('🔌 Conectando al servidor WebSocket...');
 
-        // Usar la implementación nativa de WebSocket para React Native
-        if (Platform.OS === 'web') {
-          this.ws = new WebSocket(this.config.url) as NativeWebSocket;
-        } else {
-          // Para React Native, usar la implementación nativa
-          this.ws = new (require('react-native').WebSocket)(this.config.url) as NativeWebSocket;
+        // Verificar que WebSocket esté disponible
+        if (!RNWebSocket) {
+          throw new Error('WebSocket no está disponible en esta plataforma');
         }
+
+        // Crear instancia de WebSocket
+        this.ws = new RNWebSocket(this.config.url) as NativeWebSocket;
 
         if (!this.ws) {
           throw new Error('No se pudo crear la instancia WebSocket');

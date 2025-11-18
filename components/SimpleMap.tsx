@@ -5,8 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  Platform,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,8 +14,6 @@ import { WebView } from 'react-native-webview';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ENV } from '@/constants/config';
-
-const { width, height } = Dimensions.get('window');
 
 interface UserLocation {
   latitude: number;
@@ -37,9 +33,7 @@ export default function SimpleMapScreen() {
   };
   
   const [userLocation, setUserLocation] = useState<UserLocation | null>(DEFAULT_LOCATION);
-  const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'undetermined'>('undetermined');
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
-  const [mapError, setMapError] = useState<string | null>(null);
   const [mapHtml, setMapHtml] = useState<string>('');
   const webViewRef = useRef<WebView>(null);
 
@@ -59,13 +53,11 @@ export default function SimpleMapScreen() {
         
         if (status !== 'granted') {
           console.log('❌ Permisos de ubicación denegados');
-          setLocationPermission('denied');
           setIsLoadingLocation(false);
           return;
         }
         
         console.log('✅ Permisos de ubicación concedidos');
-        setLocationPermission('granted');
         
         // Get current location
         const location = await Location.getCurrentPositionAsync({
@@ -93,7 +85,6 @@ export default function SimpleMapScreen() {
         
       } catch (error) {
         console.error('❌ Error obteniendo ubicación:', error);
-        setMapError('No se pudo obtener tu ubicación. Usando ubicación por defecto.');
         setIsLoadingLocation(false);
       }
     };
@@ -132,62 +123,7 @@ export default function SimpleMapScreen() {
             width: 100%; 
           }
           
-          /* Controles de Mapbox con estilo iPhone/Google Maps */
-          .mapboxgl-ctrl-group {
-            background: ${isDark ? 'rgba(20, 20, 20, 0.9)' : 'rgba(255, 255, 255, 0.9)'} !important;
-            border-radius: 8px !important;
-            box-shadow: 0 2px 10px ${isDark ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.15)'} !important;
-            border: none !important;
-            backdrop-filter: blur(10px) !important;
-          }
-          
-          .mapboxgl-ctrl-group button {
-            background: transparent !important;
-            border-radius: 8px !important;
-            transition: all 0.2s ease !important;
-          }
-          
-          .mapboxgl-ctrl-group button:hover {
-            background: ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'} !important;
-          }
-          
-          .mapboxgl-ctrl-zoom-in, .mapboxgl-ctrl-zoom-out {
-            width: 36px !important;
-            height: 36px !important;
-          }
-          
-          /* Popup con estilo moderno */
-          .mapboxgl-popup-content {
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px ${isDark ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.15)'};
-            background: ${isDark ? '#1a1a1a' : '#ffffff'} !important;
-            border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'} !important;
-            backdrop-filter: blur(10px) !important;
-          }
-          
-          .mapboxgl-popup-tip {
-            border-top-color: ${isDark ? '#1a1a1a' : '#ffffff'} !important;
-          }
-          
-          .popup-title {
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: ${isDark ? '#ffffff' : '#000000'};
-          }
-          
-          .popup-coords {
-            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
-            color: ${isDark ? '#a0a0a0' : '#666666'};
-            margin-bottom: 4px;
-            font-size: 14px;
-          }
-          
-          .popup-accuracy {
-            color: ${isDark ? '#808080' : '#888888'};
-            font-size: 12px;
-          }
+        
         </style>
       </head>
       <body>
@@ -357,76 +293,36 @@ export default function SimpleMapScreen() {
 
   // Render map - MAPA DE PANTALLA COMPLETA SIN MÁRGENES
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Mapa de pantalla completa */}
-      <View style={styles.mapContainer}>
-        {mapHtml ? (
-          <WebView
-            ref={webViewRef}
-            source={{ html: mapHtml }}
-            style={styles.webview}
-            scalesPageToFit={false}
-            allowsBackForwardNavigationGestures={false}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            onError={(error) => {
-              console.error('WebView error:', error);
-              setMapError('Error cargando el mapa');
-            }}
-          />
-        ) : (
-          <View style={[styles.loadingMapContainer, { backgroundColor: theme.mapContainer }]}>
-            <Ionicons name="map" size={64} color={theme.icon} />
-            <Text style={[styles.loadingMapText, { color: theme.text }]}>
-              Cargando mapa...
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* Header flotante */}
-      <View style={[styles.floatingHeader, { backgroundColor: isLoadingLocation ? theme.secondary : 'transparent' }]}>
-        {isLoadingLocation ? (
-          <View style={styles.locationLoadingContainer}>
-            <Ionicons name="location" size={20} color={theme.text} />
-            <Text style={[styles.locationLoadingText, { color: theme.text }]}>
-              Obteniendo ubicación...
-            </Text>
-          </View>
-        ) : userLocation ? (
-          <View style={[styles.locationInfo, { backgroundColor: colorScheme === 'dark' ? 'rgba(20, 20, 20, 0.9)' : 'rgba(255, 255, 255, 0.9)' }]}>
-            <Ionicons name="location" size={16} color={theme.primary} />
-            <Text style={[styles.locationText, { color: theme.text }]}>
-              {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
-            </Text>
-          </View>
-        ) : null}
-      </View>
-
-      {/* Controls flotantes */}
-      <View style={styles.controls}>
-        <TouchableOpacity
-          style={[styles.refreshButton, { backgroundColor: theme.secondary }]}
-          onPress={refreshLocation}
-        >
-          <Ionicons name="refresh" size={20} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      {mapHtml ? (
+        <WebView
+          ref={webViewRef}
+          source={{ html: mapHtml }}
+          style={styles.webview}
+          scalesPageToFit={false}
+          allowsBackForwardNavigationGestures={false}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          onError={(error) => {
+            console.error('WebView error:', error);
+          }}
+        />
+      ) : (
+        <View style={[styles.loadingMapContainer, { backgroundColor: theme.mapContainer }]}>
+          <Ionicons name="map" size={64} color={theme.icon} />
+          <Text style={[styles.loadingMapText, { color: theme.text }]}>
+            Cargando mapa...
+          </Text>
+        </View>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  // Mapa de pantalla completa sin márgenes
-  mapContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
   },
   webview: {
     flex: 1,
@@ -440,71 +336,5 @@ const styles = StyleSheet.create({
   loadingMapText: {
     fontSize: 18,
     fontWeight: '600',
-  },
-  // Header flotante estilo iPhone
-  floatingHeader: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    right: 16,
-    zIndex: 1000,
-  },
-  locationLoadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(66, 133, 244, 0.9)',
-    gap: 8,
-  },
-  locationLoadingText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  locationInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 6,
-    backdropFilter: 'blur(10px)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  locationText: {
-    fontSize: 12,
-    fontFamily: 'monospace',
-  },
-  // Controls flotantes
-  controls: {
-    position: 'absolute',
-    bottom: 50,
-    right: 20,
-    gap: 12,
-    zIndex: 1000,
-  },
-  refreshButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
 });

@@ -1,8 +1,10 @@
-import { Redirect } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Image, Text, TextInput, TouchableOpacity, View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLoginForm } from '@/hooks/useLoginForm';
+import { useEffect } from 'react';
 
 export default function Login() {
+  const router = useRouter();
   const {
     loginCredential,
     handleChangeCredentials,
@@ -15,10 +17,12 @@ export default function Login() {
     handleForgotPassword,
   } = useLoginForm();
 
-  if (isAuthenticated) {
-    console.log('✅ [Login] Usuario autenticado, redirigiendo a interfaz del conductor');
-    return <Redirect href="/(tabs)" />;
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('✅ [Login] Usuario autenticado, redirigiendo a interfaz del conductor');
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated, router]);
 
   return (
     <View style={styles.container}>

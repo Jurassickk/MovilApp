@@ -5,8 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import SimpleMapScreen from '@/components/SimpleMap';
-import MapControls from '@/components/MapControls';
-import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors as AppColors } from '@/constants/theme';
 
@@ -34,42 +32,6 @@ export default function PublicMapScreen() {
     router.push('/login');
   };
 
-  const handleRequestLocation = () => {
-    Alert.alert(
-      'Permisos de Ubicación',
-      'Esta aplicación necesita acceso a tu ubicación para mostrar el mapa. Ve a Configuración > Aplicaciones > UrbanTracker > Permisos.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Configuración', onPress: () => console.log('Abrir configuración') }
-      ]
-    );
-  };
-
-  const handleZoomIn = () => {
-    // Función placeholder para zoom in
-    console.log('Zoom in');
-  };
-
-  const handleZoomOut = () => {
-    // Función placeholder para zoom out
-    console.log('Zoom out');
-  };
-
-  const handleLocationPress = () => {
-    // Función placeholder para centrar ubicación
-    console.log('Centrar ubicación');
-  };
-
-  const handleLayerPress = () => {
-    // Función placeholder para cambiar capa
-    console.log('Cambiar capa');
-  };
-
-  const handleDirectionsPress = () => {
-    // Función placeholder para direcciones
-    console.log('Direcciones');
-  };
-
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -85,25 +47,6 @@ export default function PublicMapScreen() {
       {/* Mapa de MapBox - Pantalla completa */}
       <SimpleMapScreen />
       
-      {/* Header flotante con logo y título */}
-      <View style={[styles.floatingHeader, { 
-        backgroundColor: colorScheme === 'dark' ? 'rgba(20, 20, 20, 0.9)' : 'rgba(255, 255, 255, 0.9)'
-      }]}>
-        <View style={styles.headerContent}>
-          <Text style={[styles.appTitle, { color: theme.text }]}>🚌 UrbanTracker</Text>
-          <Text style={[styles.appSubtitle, { color: theme.icon }]}>Mapa de Rutas en Tiempo Real</Text>
-        </View>
-      </View>
-
-      {/* Controles de mapa estilo Google Maps */}
-      <MapControls
-        onLocationPress={handleLocationPress}
-        onLayerPress={handleLayerPress}
-        onDirectionsPress={handleDirectionsPress}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-      />
-
       {/* Botón flotante principal - Acceso Conductores */}
       <TouchableOpacity
         style={[styles.mainFab, { backgroundColor: '#3b82f6' }]}
@@ -111,15 +54,6 @@ export default function PublicMapScreen() {
         activeOpacity={0.8}
       >
         <Ionicons name="shield-checkmark" size={24} color="#ffffff" />
-      </TouchableOpacity>
-
-      {/* Botón secundario - Permisos */}
-      <TouchableOpacity
-        style={[styles.secondaryFab, { backgroundColor: theme.secondary }]}
-        onPress={handleRequestLocation}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="location" size={20} color="#ffffff" />
       </TouchableOpacity>
 
       {/* Modal de confirmación para login */}
@@ -160,12 +94,6 @@ export default function PublicMapScreen() {
           </View>
         </View>
       </Modal>
-
-      {/* Indicador de estado de conexión */}
-      <View style={[styles.connectionStatus, { backgroundColor: 'rgba(16, 185, 129, 0.9)' }]}>
-        <View style={styles.statusIndicator} />
-        <Text style={styles.statusText}>🟢 Mapa Activo</Text>
-      </View>
     </SafeAreaView>
   );
 }
@@ -192,36 +120,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 5,
   },
-  floatingHeader: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    right: 16,
-    zIndex: 1000,
-    borderRadius: 12,
-    padding: 16,
-    backdropFilter: 'blur(10px)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  headerContent: {
-    alignItems: 'center',
-  },
-  appTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  appSubtitle: {
-    fontSize: 12,
-    textAlign: 'center',
-  },
   mainFab: {
     position: 'absolute',
     bottom: 80,
@@ -229,24 +127,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 8,
-  },
-  secondaryFab: {
-    position: 'absolute',
-    bottom: 150,
-    left: 20,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -304,36 +184,5 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
-  },
-  connectionStatus: {
-    position: 'absolute',
-    top: 120,
-    left: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 6,
-    backdropFilter: 'blur(10px)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  statusIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#10b981',
-  },
-  statusText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '500',
   },
 });
