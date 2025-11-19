@@ -1,5 +1,5 @@
-import { useRouter } from 'expo-router';
-import { Image, Text, TextInput, TouchableOpacity, View, StyleSheet, ActivityIndicator } from 'react-native';
+import { useRouter, RelativePathString } from 'expo-router';
+import { Image, Text, TextInput, TouchableOpacity, View, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { useLoginForm } from '@/hooks/useLoginForm';
 import { useEffect } from 'react';
 
@@ -20,12 +20,19 @@ export default function Login() {
   useEffect(() => {
     if (isAuthenticated) {
       console.log('✅ [Login] Usuario autenticado, redirigiendo a interfaz del conductor');
-      router.replace('/(tabs)');
+      router.replace('/(tabs)' as RelativePathString);
     }
   }, [isAuthenticated, router]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Botón de volver atrás */}
+      <View style={styles.backButtonContainer}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>← Volver</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Header con logo */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
@@ -113,7 +120,7 @@ export default function Login() {
           Sistema seguro para conductores autorizados
         </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -121,7 +128,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
-    justifyContent: 'center',
+  },
+  backButtonContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 10,
+  },
+  backButton: {
+    alignSelf: 'flex-start',
+  },
+  backButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '500',
   },
   header: {
     alignItems: 'center',

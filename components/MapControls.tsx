@@ -286,5 +286,8 @@ const fabStyles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 8,
+    zIndex: 10,
+    borderWidth: 2,
+    borderColor: '#ffffff',
   },
 });

@@ -4,7 +4,9 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-import SimpleMapScreen from '@/components/SimpleMap';
+import RouteMap from '@/components/RouteMap';
+import RoutePanel from '@/components/RoutePanel';
+import { RouteProvider } from '@/contexts/RouteContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors as AppColors } from '@/constants/theme';
 
@@ -15,6 +17,7 @@ export default function PublicMapScreen() {
   
   const [showDriverLogin, setShowDriverLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showRoutesPanel, setShowRoutesPanel] = useState(false);
 
   useEffect(() => {
     // Simular carga inicial
@@ -44,9 +47,29 @@ export default function PublicMapScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Mapa de MapBox - Pantalla completa */}
-      <SimpleMapScreen />
-      
+      <RouteProvider>
+        <View style={{ flex: 1, backgroundColor: '#000000' }}>
+          {/* Mapa con rutas */}
+          <RouteMap />
+
+          {/* Barra inferior con botón de rutas */}
+          <View style={[styles.bottomBar, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <TouchableOpacity
+              style={[styles.routeButton, { backgroundColor: theme.primary }]}
+              onPress={() => setShowRoutesPanel(true)}
+            >
+              <Text style={styles.routeButtonText}>🗺️ Rutas</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Panel de rutas */}
+          <RoutePanel
+            visible={showRoutesPanel}
+            onClose={() => setShowRoutesPanel(false)}
+          />
+        </View>
+      </RouteProvider>
+
       {/* Botón flotante principal - Acceso Conductores */}
       <TouchableOpacity
         style={[styles.mainFab, { backgroundColor: '#3b82f6' }]}
@@ -138,6 +161,24 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 8,
   },
+  routesFab: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 8,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -184,5 +225,58 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  routesPanel: {
+    position: 'absolute',
+    bottom: 140, // Above the fab
+    left: 20,
+    right: 20,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 8,
+  },
+  routesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  routesTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  routesList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  routeButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  routeButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
 });

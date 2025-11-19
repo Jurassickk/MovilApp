@@ -30,13 +30,6 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="map"
-          options={{
-            title: 'Mapa',
-            tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
-          }}
-        />
-        <Tabs.Screen
           name="explore"
           options={{
             title: 'Perfil',
