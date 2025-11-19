@@ -19,7 +19,7 @@ export const useLocationTracking = () => {
 
   // Configuración WebSocket
   const wsConfig: WebSocketConfig = {
-    url: 'ws://10.3.234.142:8080/ws',
+    url: 'ws://10.3.235.231:8080/ws', // URL del backend para WebSocket de ubicación
     reconnectInterval: 5000,
     maxReconnectAttempts: 5,
     heartbeatInterval: 30000,

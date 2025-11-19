@@ -85,10 +85,8 @@ export class LocationWebSocketService {
 
       console.log('🗺️ Iniciando servicio de tracking de ubicación...');
 
-      // Conectar WebSocket si no está conectado
-      if (!this.wsService.isConnected()) {
-        await this.wsService.connect();
-      }
+      // WebSocket deshabilitado temporalmente para pruebas
+      console.log('⚠️ WebSocket deshabilitado, usando solo MQTT');
 
       // Verificar permisos de ubicación
       const hasPermission = await this.checkLocationPermissions();

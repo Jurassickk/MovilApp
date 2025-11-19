@@ -7,11 +7,10 @@ let RNWebSocket: any = null;
 if (Platform.OS === 'web') {
   RNWebSocket = WebSocket;
 } else {
-  try {
-    RNWebSocket = require('react-native').WebSocket;
-  } catch {
+  // En React Native, WebSocket está disponible globalmente
+  RNWebSocket = (global as any).WebSocket;
+  if (!RNWebSocket) {
     console.warn('⚠️ WebSocket no disponible en esta plataforma');
-    RNWebSocket = null;
   }
 }
 
@@ -100,7 +99,13 @@ export class WebSocketService {
 
         // Verificar que WebSocket esté disponible
         if (!RNWebSocket) {
-          throw new Error('WebSocket no está disponible en esta plataforma');
+          console.warn('⚠️ WebSocket no disponible, intentando usar polyfill...');
+          // Intentar usar polyfill si está disponible
+          try {
+            RNWebSocket = require('react-native-tcp-socket').WebSocket || require('ws');
+          } catch {
+            throw new Error('WebSocket no está disponible en esta plataforma');
+          }
         }
 
         // Crear instancia de WebSocket
