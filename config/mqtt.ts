@@ -117,12 +117,12 @@ export const createLocationMessage = (
   driverId?: string,
   routeId?: string
 ) => ({
-  lat: latitude,
-  lon: longitude,
-  timestamp,
-  ...(vehicleId && { vehicleId }),
-  ...(driverId && { driverId }),
-  ...(routeId && { routeId }),
+  routeId: routeId ? parseInt(routeId) : null,
+  vehicleId: vehicleId || 'unknown',
+  timestamp: new Date(timestamp).toISOString(),
+  latitude,
+  longitude,
+  dataSource: 'MOVILE',
 });
 
 // Función para generar topic de ubicación basado en routeId

@@ -12,6 +12,7 @@ export interface LocationWebSocketConfig extends WebSocketConfig {
   publishInterval: number;
   batchSize: number;
   enableOfflineQueue: boolean;
+  publishLocation?: (lat: number, lon: number, timestamp: number, vehicleId?: string, driverId?: string, routeId?: string) => boolean;
 }
 
 export interface LocationTrackingOptions {
@@ -84,6 +85,7 @@ export class LocationWebSocketService {
       };
 
       console.log('🗺️ Iniciando servicio de tracking de ubicación...');
+      alert('Start tracking called');
 
       // WebSocket deshabilitado temporalmente para pruebas
       console.log('⚠️ WebSocket deshabilitado, usando solo MQTT');
@@ -103,7 +105,15 @@ export class LocationWebSocketService {
       }
 
       this.notifyStatusChange();
-      
+
+      // Enviar ubicación de prueba al iniciar
+      console.log('📍 Enviando ubicación de prueba al iniciar tracking...');
+      this.sendLocation({
+        latitude: 4.60971,
+        longitude: -74.08175,
+        timestamp: Date.now() / 1000
+      });
+
       console.log('✅ Servicio de tracking iniciado exitosamente');
       return true;
       
@@ -169,29 +179,19 @@ export class LocationWebSocketService {
         }
       }
 
-      // Usar LocationService con MQTT como método principal
-      if (!success) {
-        success = LocationService.publishLocationData(
-          location,
-          this.trackingOptions.routeId,
-          this.trackingOptions.vehicleId || 'unknown',
+      // Usar MQTT real si está disponible
+      if (!success && this.config.publishLocation) {
+        success = this.config.publishLocation(
+          location.latitude,
+          location.longitude,
+          location.timestamp,
+          this.trackingOptions.vehicleId,
           this.trackingOptions.driverId,
-          // Función de publicación MQTT simple
-          (topic: string, data: any) => {
-            try {
-              console.log(`📡 MQTT Publish: ${topic}`, data);
-              // Aquí se integraría con el hook MQTT real
-              // Por ahora solo simula la publicación
-              return true;
-            } catch (error) {
-              console.error('❌ Error en función MQTT:', error);
-              return false;
-            }
-          }
+          this.trackingOptions.routeId
         );
-        
+
         if (success) {
-          console.log('✅ Ubicación enviada vía MQTT principal');
+          console.log('✅ Ubicación enviada vía MQTT real');
         }
       }
 

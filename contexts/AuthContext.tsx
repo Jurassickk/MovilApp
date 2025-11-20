@@ -171,10 +171,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             dispatch({ type: 'SET_DRIVER_INFO_FETCHED', payload: true });
           } else {
             console.log(
-              '⚠️ [AuthProvider.fetchDriverInfoAfterLogin] No se encontraron rutas asignadas al vehículo'
+              '⚠️ [AuthProvider.fetchDriverInfoAfterLogin] No se encontraron rutas asignadas al vehículo, asignando ruta por defecto'
             );
 
-            const updatePayload = { vehicleId: vehicleId.toString() };
+            const updatePayload = { vehicleId: vehicleId.toString(), routeId: '1' }; // Ruta por defecto
             dispatch({
               type: 'UPDATE_DRIVER_INFO',
               payload: updatePayload,
@@ -183,11 +183,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const updatedUser = {
               ...state.user,
               vehicleId: vehicleId.toString(),
+              routeId: '1',
             };
             await AsyncStorage.setItem('auth_user', JSON.stringify(updatedUser));
 
             console.log(
-              '✅ [AuthProvider.fetchDriverInfoAfterLogin] Estado actualizado solo con vehicleId'
+              '✅ [AuthProvider.fetchDriverInfoAfterLogin] Estado actualizado con vehicleId y routeId por defecto'
             );
 
             dispatch({ type: 'SET_DRIVER_INFO_FETCHED', payload: true });
